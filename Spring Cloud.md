@@ -319,7 +319,7 @@ $ find .
 
 现在我们已经启动了一个Config Server，让我们启动一个新的Spring Boot应用程序，该应用程序使用Config Server加载自己的配置并刷新其配置以反映Config Server的需求变化，而无需重新启动JVM。 添加org.springframework.cloud:spring-cloud-starter-config依赖项以连接到Config Server。 Spring将看到配置属性文件，就像从application.properties或application.yml或任何其他PropertySource加载的任何属性文件一样。
 
-在引导阶段，必须先读入配置Config Client的属性，然后才能从Config Server读取其余的应用程序配置。 将客户端的spring.application.name指定为-bootiful-client，并在configuration-client / src / main / resources / bootstrap.properties中指定配置服务器spring.cloud.config.uri的位置，它将在此时加载 任何其他配置。
+在引导阶段，必须先读入配置Config Client的属性，然后才能从Config Server读取其余的应用程序配置。 将客户端的spring.application.name指定为a-bootiful-client，并在configuration-client / src / main / resources / bootstrap.properties中指定配置服务器spring.cloud.config.uri的位置，它将在此时加载 任何其他配置。
 
 configuration-client/src/main/resources/bootstrap.properties
 
@@ -401,4 +401,3 @@ $ curl localhost:8080/actuator/refresh -d {} -H "Content-Type: application/json"
 想要撰写新指南或为现有指南做出贡献？ 查看我们的[contribution guidelines](https://github.com/spring-guides/getting-started-guides/wiki).
 
 > 所有指南均附有代码的ASLv2许可证，以及 [Attribution, NoDerivatives creative commons license](https://creativecommons.org/licenses/by-nd/3.0/) 创作公共许可证。
-

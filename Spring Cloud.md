@@ -1,5 +1,35 @@
 ### Spring Cloud
 
+
+
+
+
+![img](https://spring.io/img/homepage/icon-spring-cloud.svg)
+
+
+
+## 协调任何事项：简化分布式系统
+
+构建分布式系统不需要复杂且容易出错。 Spring Cloud为最常见的分布式系统模式提供了简单易用的编程模型，帮助开发人员构建弹性，可靠和协调的应用程序。 Spring Cloud构建于Spring Boot之上，使开发人员可以轻松入门并快速提高工作效率。
+
+![img](https://spring.io/img/homepage/diagram-distributed-systems.svg)
+
+
+
+[ Spring Cloud Reference Manual](https://cloud.spring.io/spring-cloud-static/current/)(Spring Cloud参考手册)
+
+入门指南
+
+[ Config(配置)](https://spring.io/guides/gs/centralized-configuration/)
+
+[ Registry](https://spring.io/guides/gs/service-registration-and-discovery/)(注册)
+
+[Breakers](https://spring.io/guides/gs/circuit-breaker/)(断路器)
+
+[Load Balancing](https://spring.io/guides/gs/client-side-load-balancing/)(负载均衡)
+
+[ Routing](https://spring.io/guides/gs/routing-and-filtering/)(路由)
+
 Spring Cloud为开发人员提供了快速构建分布式系统中一些常见模式的工具（例如配置管理，服务发现，断路器，智能路由，微代理，控制总线，一次性令牌，全局锁定，领导选举，分布式 会话，集群状态）。 分布式系统的协调导致锅炉板模式，使用Spring Cloud开发人员可以快速站起来实现这些模式的服务和应用程序。 它们适用于任何分布式环境，包括开发人员自己的笔记本电脑，裸机数据中心和Cloud Foundry等托管平台。
 
 #### 特征
@@ -187,4 +217,188 @@ Finchley构建并使用Spring Boot 2.0.x，预计不会与Spring Boot 1.5.x一�
 ## Quick start
 
 使用 [Spring Initializr](https://start.spring.io/) 引导你的应用程序
+
+## Getting Started
+
+### Centralized Configuration(集中配置)
+
+本指南将引导您完成 [Spring Cloud Config Server](https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html)的启动和消费配置过程
+
+
+
+### 你要建造什么
+
+您将设置一个Config Server，然后构建一个在启动时使用该配置的客户端，然后刷新配置而不重新启动客户端。
+
+### 你需要什么
+
+- 大约15分钟
+- 最喜欢的文本编辑器或IDE
+- [JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) or later
+- [Gradle 4+](http://www.gradle.org/downloads) or [Maven 3.2+](https://maven.apache.org/download.cgi)
+- 您还可以将代码直接导入IDE:
+  - [Spring Tool Suite (STS)](https://spring.io/guides/gs/sts)
+  - [IntelliJ IDEA](https://spring.io/guides/gs/intellij-idea/)
+
+### 如何完成本指南
+
+与大多数Spring入门指南一样，您可以从头开始并完成每个步骤，或者您可以绕过您已熟悉的基本设置步骤。 无论哪种方式，您最终都会使用工作代码。
+
+从头开始, 请继续使用 [Build with Gradle](https://spring.io/guides/gs/centralized-configuration/#scratch).
+
+要跳过基础知识，请执行以下操作：
+
+- [Download](https://github.com/spring-guides/gs-centralized-configuration/archive/master.zip) 并解压缩本指南的源存储库，或使用它进行克隆 [Git](https://spring.io/understanding/Git): `git clone https://github.com/spring-guides/gs-centralized-configuration.git`
+- cd到gs-centralized-configuration / initial
+- 跳转到 [ Config Server](https://spring.io/guides/gs/centralized-configuration/#initial).
+
+完成后，您可以根据gs-centralized-configuration / complete中的代码检查结果。
+
+## Build with Gradle
+
+
+
+## Build with Maven
+
+
+
+## Build with your IDE
+
+### 启动Config Server
+
+首先，您需要一个Config Service作为Spring应用程序和典型版本控制的配置文件存储库之间的一种中介。 您可以使用Spring Cloud的@EnableConfigServer来支持其他应用程序可以与之通信的配置服务器。 这是一个常规的Spring Boot应用程序，添加了一个注释以启用配置服务器。
+
+```
+configuration-service/src/main/java/hello/ConfigServiceApplication.java
+```
+
+```java
+package hello;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.config.server.EnableConfigServer;
+
+@EnableConfigServer
+@SpringBootApplication
+public class ConfigServiceApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServiceApplication.class, args);
+    }
+}
+```
+
+Config Server需要知道要管理的存储库。 这里有几种选择，但我们将使用基于Git的文件系统存储库。 您也可以轻松地将Config Server指向Github或GitLab存储库。 在文件系统上，创建一个新目录git init。 然后将名为a-bootiful-client.properties的文件添加到Git存储库。 确保也git commit它。 稍后，您将使用Spring Boot应用程序连接到Config Server，该应用程序的spring.application.name属性将其标识为Config Server的a-bootiful-client。 这就是Config Server将如何知道要发送给特定客户端的配置集。 它还将从Git存储库中名为application.properties或application.yml的任何文件发送所有值。 更具体命名文件中的属性键（如a-bootiful-client.properties）会覆盖application.properties或application.yml中的属性键。
+
+添加一个简单的属性和值, message = Hello world, 到新创建的 a-bootiful-client.properties到新创建的文件，然后 git commit变更.
+
+通过在configuration-service / src / main / resources / application.properties中指定spring.cloud.config.server.git.uri属性来指定Git存储库的路径。 确保在同一台计算机上同时运行此服务器和另一个Spring Boot应用程序时，还要指定不同的server.port值以避免端口冲突。
+
+`configuration-service/src/main/resources/application.properties`
+
+```properties
+server.port=8888
+
+spring.cloud.config.server.git.uri=${HOME}/Desktop/config
+```
+
+在此示例中，我们在$ {HOME} / Desktop / config中使用基于文件的git存储库。 您可以通过创建一个新目录并将git提交属性和YAML文件轻松创建一个。 例如 E.g
+
+```
+$ cd ~/Desktop/config
+$ find .
+./.git
+...
+./application.yml
+```
+
+或者您可以使用远程git存储库，例如 在github上，如果您将应用程序中的配置文件更改为指向该文件。
+
+### 使用Config Client从Config Server读取配置
+
+现在我们已经启动了一个Config Server，让我们启动一个新的Spring Boot应用程序，该应用程序使用Config Server加载自己的配置并刷新其配置以反映Config Server的需求变化，而无需重新启动JVM。 添加org.springframework.cloud:spring-cloud-starter-config依赖项以连接到Config Server。 Spring将看到配置属性文件，就像从application.properties或application.yml或任何其他PropertySource加载的任何属性文件一样。
+
+在引导阶段，必须先读入配置Config Client的属性，然后才能从Config Server读取其余的应用程序配置。 将客户端的spring.application.name指定为-bootiful-client，并在configuration-client / src / main / resources / bootstrap.properties中指定配置服务器spring.cloud.config.uri的位置，它将在此时加载 任何其他配置。
+
+configuration-client/src/main/resources/bootstrap.properties
+
+```properties
+spring.application.name=a-bootiful-client
+# N.B. this is the default:
+spring.cloud.config.uri=http://localhost:8888
+```
+
+我们还希望启用/ refresh端点，以便我们可以演示动态配置更改：
+
+configuration-client/src/main/resources/application.properties
+
+```properties
+management.endpoints.web.exposure.include=*
+```
+
+客户端可以使用传统机制（例如@ConfigurationProperties，@ Value（“$ {...}”）或通过环境抽象来访问Config Server中的任何值。 创建一个Spring MVC REST控制器，它返回已解析的消息属性的值。 请参阅 [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)指南，以了解有关使用Spring MVC和Spring Boot构建REST服务的更多信息。
+
+默认情况下，配置值在客户端的启动时读取，而不是再次读取。 您可以通过使用Spring Cloud Config @RefreshScope注释MessageRestController然后触发刷新事件来强制bean刷新其配置 - 从Config Server中提取更新的值。
+
+configuration-client/src/main/java/hello/ConfigClientApplication.java
+
+```java
+package hello;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+public class ConfigClientApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigClientApplication.class, args);
+    }
+}
+
+@RefreshScope
+@RestController
+class MessageRestController {
+
+    @Value("${message:Hello default}")
+    private String message;
+
+    @RequestMapping("/message")
+    String getMessage() {
+        return this.message;
+    }
+}
+```
+
+### 测试应用程序
+
+首先启动配置服务，然后在加载后启动客户端，测试端到端结果。 访问浏览器中的客户端应用程序<http://localhost:8080/message>。 在那里，您应该看到响应中反映的字符串 Hello world。
+
+将Git存储库中a-bootiful-client.properties文件中的消息密钥更改为不同的东西（Hello Spring！，也许？）。 您可以通过访问确认Config Server看到更改<http://localhost:8888/a-bootiful-client/default> 您需要调用刷新Spring Boot Actuator端点，以强制客户端刷新自身并绘制新值.Spring Boot的Actuator公开有关应用程序的操作端点，如运行状况检查和环境信息。 为了使用它，您必须将org.springframework.boot：spring-boot-starter-actuator添加到客户端应用程序的CLASSPATH中。 您可以通过向客户端的刷新端点发送空HTTP POST来调用刷新Actuator端点，<http://localhost:8080/actuator/refresh> 然后通过查看 http:// localhost:8080/message 端点确认它是否有效。
+
+```
+$ curl localhost:8080/actuator/refresh -d {} -H "Content-Type: application/json"
+```
+
+> 我们在客户端应用程序中设置management.endpoints.web.exposure.include = *以使其易于测试（默认情况下，因为Spring Boot 2.0默认情况下不会公开Actuator端点）。 默认情况下，如果未设置标志，仍可以通过JMX访问它们。
+
+### 摘要
+
+恭喜！ 您刚刚使用Spring集中配置所有服务，首先启动然后动态更新配置。
+
+### 也可以看看
+
+以下指南也可能有所帮助：
+
+- [Building an Application with Spring Boot](https://spring.io/guides/gs/spring-boot/)
+- [Creating a Multi Module Project](https://spring.io/guides/gs/multi-module/)
+
+想要撰写新指南或为现有指南做出贡献？ 查看我们的[contribution guidelines](https://github.com/spring-guides/getting-started-guides/wiki).
+
+> 所有指南均附有代码的ASLv2许可证，以及 [Attribution, NoDerivatives creative commons license](https://creativecommons.org/licenses/by-nd/3.0/) 创作公共许可证。
 
